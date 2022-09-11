@@ -1,0 +1,13 @@
+#+title: Awesome WM configuration
+#+author: Diacus Mágnuz
+#+email: diacus.magnuz@gmail.com
+
+* Installation
+#+begin_src shell
+git clone https://github.com/diacus/awesome-config ~/.config/awesome
+#+end_src
+
+* Personalization
+#+begin_quote
+TBD
+#+end_quote
