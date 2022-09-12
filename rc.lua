@@ -107,7 +107,6 @@ else
     mymainmenu = awful.menu({
         items = {
                   menu_awesome,
-                  { "Debian", debian.menu.Debian_menu.Debian },
                   menu_terminal,
                 }
     })
