@@ -45,8 +45,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
--- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
-beautiful.init(awful.util.getdir("config") .. "/themes/nord/theme.lua")
+beautiful.init(gears.filesystem.get_themes_dir() .. "nord/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "gnome-terminal --hide-menubar"
@@ -567,7 +566,12 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 autorun = true
 autorunApps =
 {
-        "/usr/local/bin/set-screen-order",
-        "emacs --daemon"
+        "sh " .. os.getenv("HOME") .. "/.fehbg"
 }
+if autorun then
+	for app = 1, #autorunApps do
+		awful.util.spawn(autorunApps[app])
+	end
+end
+--
 -- }}}
