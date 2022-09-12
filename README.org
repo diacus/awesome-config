@@ -3,8 +3,17 @@
 #+email: diacus.magnuz@gmail.com
 
 * Installation
+Clone the repository in to our confing directory
 #+begin_src shell
 git clone https://github.com/diacus/awesome-config ~/.config/awesome
+#+end_src
+
+After cloning the repository, move into the configuration folder and clone the
+widgets writen by =streetturtle=.
+
+#+begin_src shell
+cd ~/.config/awesome
+git clone https://github.com/streetturtle/awesome-wm-widgets
 #+end_src
 
 * Personalization
