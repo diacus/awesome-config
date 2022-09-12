@@ -45,6 +45,11 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "gtk/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "sky/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
 beautiful.init(gears.filesystem.get_themes_dir() .. "nord/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
@@ -90,10 +95,24 @@ myawesomemenu = {
    { "quit", function() awesome.quit() end },
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+local menu_awesome = { "awesome", myawesomemenu, beautiful.awesome_icon }
+local menu_terminal = { "open terminal", terminal }
+
+if has_fdo then
+    mymainmenu = freedesktop.menu.build({
+        before = { menu_awesome },
+        after =  { menu_terminal }
+    })
+else
+    mymainmenu = awful.menu({
+        items = {
+                  menu_awesome,
+                  { "Debian", debian.menu.Debian_menu.Debian },
+                  menu_terminal,
+                }
+    })
+end
+
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
@@ -105,9 +124,31 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
 
+-- ==========================================
+-- WIDGETS BY streetturtle/awesome-wm-widgets
+-- ==========================================
+
+-- Battery widget
+batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+
+-- Calendar widget
+calendar_widget = require("awesome-wm-widgets.calendar-widget.calendar")
+
 -- {{{ Wibar
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock()
+
+cw = calendar_widget({ theme = 'nord', placement = 'top_right' })
+mytextclock:connect_signal(
+    "button::press",
+    function(_, _, _, button)
+        if button == 1 then cw.toggle() end
+    end
+)
+
+volume_widget = require("awesome-wm-widgets.volume-widget.volume")
+fs_widget = require("awesome-wm-widgets.fs-widget.fs-widget")
+logout_menu_widget = require("awesome-wm-widgets.logout-menu-widget.logout-menu")
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -169,7 +210,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+    awful.tag({ "W", "E", "S", "O", "M", "E" }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -187,16 +228,32 @@ awful.screen.connect_for_each_screen(function(s)
         filter  = awful.widget.taglist.filter.all,
         buttons = taglist_buttons
     }
+    -- and apply shape to it
+    if beautiful.taglist_shape_container then
+        local background_shape_wrapper = wibox.container.background(s.mytaglist)
+        background_shape_wrapper._do_taglist_update_now = s.mytaglist._do_taglist_update_now
+        background_shape_wrapper._do_taglist_update = s.mytaglist._do_taglist_update
+        background_shape_wrapper.shape = beautiful.taglist_shape_container
+        background_shape_wrapper.shape_clip = beautiful.taglist_shape_clip_container
+        background_shape_wrapper.shape_border_width = beautiful.taglist_shape_border_width_container
+        background_shape_wrapper.shape_border_color = beautiful.taglist_shape_border_color_container
+        s.mytaglist = background_shape_wrapper
+    end
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = tasklist_buttons,
+        widget_template = beautiful.tasklist_widget_template
     }
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    s.mywibox = awful.wibar({
+        bg = "#00000000",
+        position = "top",
+        screen = s
+    })
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -212,7 +269,21 @@ awful.screen.connect_for_each_screen(function(s)
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
             wibox.widget.systray(),
+            volume_widget({ type = 'arc' }),
+            fs_widget({ mounts = { '/', '/home' } }), -- multiple mounts
+            batteryarc_widget({
+                show_current_level = true,
+                arc_thickness = 1,
+            }),
             mytextclock,
+            logout_menu_widget({
+                onlock = function()
+                    local wp = '~/.wallpapers/metal.png'
+                    local bg = '000000'
+
+                    awful.spawn.with_shell("i3lock -c " .. bg .. " -i " .. wp)
+                end
+            }),
             s.mylayoutbox,
         },
     }
@@ -326,7 +397,10 @@ globalkeys = gears.table.join(
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end,
-              {description = "show the menubar", group = "launcher"})
+              {description = "show the menubar", group = "launcher"}),
+    awful.key({ modkey }, "]", function() volume_widget:inc() end),
+    awful.key({ modkey }, "[", function() volume_widget:dec() end),
+    awful.key({ modkey }, "\\", function() volume_widget:toggle() end)
 )
 
 clientkeys = gears.table.join(
@@ -490,7 +564,7 @@ awful.rules.rules = {
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = true }
+      }, properties = { titlebars_enabled = false }
     },
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
@@ -561,12 +635,14 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+-- }}}
+--
 
 -- Autorun programs
 autorun = true
 autorunApps =
 {
-        "sh " .. os.getenv("HOME") .. "/.fehbg"
+        "sh " .. os.getenv("HOME") .. "/.xinitrc",
 }
 if autorun then
 	for app = 1, #autorunApps do
