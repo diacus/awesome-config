@@ -52,6 +52,8 @@ end
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
 beautiful.init(gears.filesystem.get_themes_dir() .. "nord/theme.lua")
 
+beautiful.useless_gap = 5
+
 -- This is used later as the default terminal and editor to run.
 terminal = "gnome-terminal --hide-menubar"
 editor = os.getenv("EDITOR") or "vim"
@@ -634,19 +636,8 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
--- }}}
---
 
 -- Autorun programs
-autorun = true
-autorunApps =
-{
-        "sh " .. os.getenv("HOME") .. "/.xinitrc",
-}
-if autorun then
-	for app = 1, #autorunApps do
-		awful.util.spawn(autorunApps[app])
-	end
-end
+awful.spawn.with_shell(os.getenv("HOME") .. "/.config/awesome/autorun.sh")
 --
 -- }}}
