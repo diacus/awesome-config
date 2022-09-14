@@ -279,7 +279,7 @@ awful.screen.connect_for_each_screen(function(s)
             mytextclock,
             logout_menu_widget({
                 onlock = function()
-                    local wp = '~/.wallpapers/metal.png'
+                    local wp = '/usr/share/wallpapers/Mexico-Xochimilco-Wallpaper-1080p.jpg'
                     local bg = '000000'
 
                     awful.spawn.with_shell("i3lock -c " .. bg .. " -i " .. wp)
@@ -636,8 +636,7 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+-- }}}
 
 -- Autorun programs
 awful.spawn.with_shell(os.getenv("HOME") .. "/.config/awesome/autorun.sh")
---
--- }}}
