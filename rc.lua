@@ -52,8 +52,6 @@ end
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
 beautiful.init(gears.filesystem.get_themes_dir() .. "nord/theme.lua")
 
-beautiful.useless_gap = 5
-
 -- This is used later as the default terminal and editor to run.
 terminal = "gnome-terminal --hide-menubar"
 editor = os.getenv("EDITOR") or "vim"
@@ -270,7 +268,7 @@ awful.screen.connect_for_each_screen(function(s)
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
             wibox.widget.systray(),
-            volume_widget({ type = 'arc' }),
+            volume_widget({ type = 'arc', device = 'default' }),
             fs_widget({ mounts = { '/', '/home' } }), -- multiple mounts
             batteryarc_widget({
                 show_current_level = true,
