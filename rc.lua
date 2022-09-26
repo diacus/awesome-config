@@ -168,26 +168,27 @@ local taglist_buttons = gears.table.join(
                 )
 
 local tasklist_buttons = gears.table.join(
-                     awful.button({ }, 1, function (c)
-                                              if c == client.focus then
-                                                  c.minimized = true
-                                              else
-                                                  c:emit_signal(
-                                                      "request::activate",
-                                                      "tasklist",
-                                                      {raise = true}
-                                                  )
-                                              end
-                                          end),
-                     awful.button({ }, 3, function()
-                                              awful.menu.client_list({ theme = { width = 250 } })
-                                          end),
-                     awful.button({ }, 4, function ()
-                                              awful.client.focus.byidx(1)
-                                          end),
-                     awful.button({ }, 5, function ()
-                                              awful.client.focus.byidx(-1)
-                                          end))
+    awful.button({ }, 1, function (c)
+            if c == client.focus then
+                c.minimized = true
+            else
+                c:emit_signal(
+                    "request::activate",
+                    "tasklist",
+                    {raise = true}
+                )
+            end
+    end),
+    awful.button({ }, 3, function()
+            awful.menu.client_list({ theme = { width = 250 } })
+    end),
+    awful.button({ }, 4, function ()
+            awful.client.focus.byidx(1)
+    end),
+    awful.button({ }, 5, function ()
+            awful.client.focus.byidx(-1)
+    end)
+)
 
 local function set_wallpaper(s)
     -- Wallpaper
@@ -244,7 +245,33 @@ awful.screen.connect_for_each_screen(function(s)
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
         buttons = tasklist_buttons,
-        widget_template = beautiful.tasklist_widget_template
+        layout  = {
+            spacing = 1,
+            layout = wibox.layout.flex.horizontal
+        },
+        style   = {
+            shape     = gears.shape.rounded_rect,
+            bg_normal = beautiful.bg_normal .. "00",
+            bg_focus  = beautiful.bg_focus  .. "00",
+            bg_urgent = beautiful.bg_urgent .. "00",
+        },
+        widget_template = {
+            {
+                {
+                    id = 'clienticon',
+                    widget = awful.widget.clienticon,
+                },
+                margins = 0,
+                widget = wibox.container.margin,
+            },
+            id              = 'background_role',
+            forced_width    = 64,
+            forced_height   = 64,
+            widget          = wibox.container.background,
+            create_callback = function(self, c, index, objects) --luacheck; no used
+                self:get_children_by_id('clienticon')[1].client = c
+            end,
+        }
     }
 
     -- Create the wibox
